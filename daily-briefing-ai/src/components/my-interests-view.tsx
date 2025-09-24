@@ -32,7 +32,7 @@ export function MyInterestsView() {
   }
 
   const removeInterest = (interest: string) => {
-    const updatedInterests = interests.filter(i => i !== interest)
+    const updatedInterests = interests.filter((i: string) => i !== interest)
     setInterests(updatedInterests)
     storage.removeInterest(interest)
   }
@@ -76,7 +76,7 @@ export function MyInterestsView() {
             <Input
               placeholder="Enter an interest (e.g., artificial intelligence, climate change)"
               value={newInterest}
-              onChange={(e) => setNewInterest(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewInterest(e.target.value)}
               onKeyPress={handleKeyPress}
             />
             <Button onClick={addInterest}>Add</Button>
@@ -86,9 +86,8 @@ export function MyInterestsView() {
             <div className="space-y-2">
               <p className="text-sm font-medium">Your interests:</p>
               <div className="flex flex-wrap gap-2">
-                {interests.map((interest) => (
+                {interests.map((interest: string) => (
                   <Badge
-                    key={interest}
                     variant="secondary"
                     className="cursor-pointer"
                     onClick={() => removeInterest(interest)}
@@ -127,14 +126,17 @@ export function MyInterestsView() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {generatedBriefings.map((briefing, index) => (
+            {generatedBriefings.map((briefing: BriefingResult, index: number) => (
               <div key={index} className="border rounded-lg p-4 space-y-3">
                 <h3 className="font-semibold text-lg">{briefing.title}</h3>
-                <p className="text-sm text-muted-foreground">{briefing.summary}</p>
+                <div
+                  className="text-sm text-muted-foreground prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: briefing.summary }}
+                />
                 <div className="space-y-2">
                   <p className="text-xs font-medium">Satirical Tweets:</p>
                   <div className="space-y-1 text-xs text-muted-foreground">
-                    {briefing.tweets.map((tweet, tweetIndex) => (
+                    {briefing.tweets.map((tweet: string, tweetIndex: number) => (
                       <p key={tweetIndex}>• {tweet}</p>
                     ))}
                   </div>
@@ -142,8 +144,8 @@ export function MyInterestsView() {
                 <div className="space-y-2">
                   <p className="text-xs font-medium">Sources:</p>
                   <div className="flex flex-wrap gap-1">
-                    {briefing.sources.map((source, sourceIndex) => (
-                      <Badge key={sourceIndex} variant="outline" className="text-xs">
+                    {briefing.sources.map((source: string, sourceIndex: number) => (
+                      <Badge variant="outline" className="text-xs">
                         {source}
                       </Badge>
                     ))}

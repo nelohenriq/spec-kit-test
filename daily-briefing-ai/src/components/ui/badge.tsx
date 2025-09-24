@@ -6,7 +6,7 @@ export interface BadgeProps
   variant?: "default" | "secondary" | "destructive" | "outline"
 }
 
-function Badge({ className, variant = "default", ...props }: BadgeProps) {
+function Badge({ className, variant = "default", ...props }: BadgeProps & { className?: string }) {
   return (
     <div
       className={cn(

@@ -30,6 +30,7 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+.env
 
 # vercel
 .vercel
@@ -62,4 +63,4 @@ tmp/
 temp/
 
 # cache
-.cache/
+.cache/"node-v18.19.0-win-x64/" 

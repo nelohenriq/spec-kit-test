@@ -80,15 +80,16 @@ export function TrendingNowView() {
           {trendingTopics.length > 0 && (
             <div className="space-y-4">
               <p className="text-sm font-medium">Trending Topics:</p>
-              {trendingTopics.map((topic) => (
+              {trendingTopics.map((topic: TrendingTopic) => (
                 <Card key={topic.id}>
                   <CardHeader>
                     <CardTitle className="text-lg">{topic.title}</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      {topic.summary}
-                    </p>
+                    <div
+                      className="text-sm text-muted-foreground prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: topic.summary }}
+                    />
 
                     <div className="space-y-2">
                       <p className="text-xs font-medium">Satirical Tweets:</p>
@@ -103,7 +104,7 @@ export function TrendingNowView() {
                       <p className="text-xs font-medium">Sources:</p>
                       <div className="space-y-1">
                         {topic.sources.map((source, sourceIndex) => (
-                          <Badge key={sourceIndex} variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs">
                             {source}
                           </Badge>
                         ))}

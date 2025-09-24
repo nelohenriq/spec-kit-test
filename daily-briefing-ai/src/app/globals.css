@@ -57,3 +57,41 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .prose {
+    @apply text-foreground;
+  }
+
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    @apply text-foreground font-semibold mt-4 mb-2;
+  }
+
+  .prose h3 {
+    @apply text-base;
+  }
+
+  .prose p {
+    @apply mb-3 leading-relaxed;
+  }
+
+  .prose ul {
+    @apply list-disc list-inside mb-3 space-y-1;
+  }
+
+  .prose li {
+    @apply leading-relaxed;
+  }
+
+  .prose strong {
+    @apply font-semibold text-foreground;
+  }
+
+  .prose em {
+    @apply text-muted-foreground italic;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-muted pl-4 italic text-muted-foreground;
+  }
+}

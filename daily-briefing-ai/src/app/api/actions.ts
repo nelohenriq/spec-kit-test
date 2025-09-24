@@ -5,7 +5,7 @@ import { storage } from '@/lib/storage'
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
-const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
 export interface BriefingResult {
   title: string
@@ -96,7 +96,15 @@ export async function getTrendingTopics(): Promise<string[]> {
 export async function generateSingleBriefingForInterest(interest: string): Promise<BriefingResult> {
   try {
     // Generate summary with Google Search grounding
-    const summaryPrompt = `Research and provide a comprehensive summary about "${interest}". Include key recent developments, important facts, and current trends. Use a neutral, informative tone and cite your sources.`
+    const summaryPrompt = `Research and provide a comprehensive summary about "${interest}". Include key recent developments, important facts, and current trends. Use a neutral, informative tone and cite your sources.
+
+Format your response as HTML with proper structure:
+- Use <h3> tags for section headings
+- Use <p> tags for paragraphs
+- Use <ul> and <li> for lists
+- Use <strong> for emphasis
+- Include source citations as <em> tags
+- Keep the content well-structured and readable`
 
     const summaryResult = await model.generateContent(summaryPrompt)
     const summary = summaryResult.response.text()
@@ -146,8 +154,8 @@ TWEET: [third tweet here]`
     // Parse tweets from the response
     const tweets = tweetText
       .split('TWEET:')
-      .map(tweet => tweet.trim())
-      .filter(tweet => tweet.length > 0 && tweet.length <= 280)
+      .map((tweet: string) => tweet.trim())
+      .filter((tweet: string) => tweet.length > 0 && tweet.length <= 280)
       .slice(0, 3)
 
     // If we don't have 3 tweets, pad with enhanced generic ones
@@ -222,7 +230,15 @@ async function generateWithGoogleSearch(topic: string, prompt: string): Promise<
 
 IMPORTANT: When providing information about "${topic}", ensure your response is grounded in real, current information. If you're using search capabilities, cite specific recent sources and data points. Focus on factual accuracy and avoid unsubstantiated claims.
 
-Please structure your response with:
+Please structure your response as HTML with proper formatting:
+- Use <h3> tags for section headings
+- Use <p> tags for paragraphs
+- Use <ul> and <li> for lists
+- Use <strong> for emphasis
+- Include source citations as <em> tags
+- Keep the content well-structured and readable
+
+Structure your response with:
 1. Key facts and recent developments
 2. Specific data points or statistics when available
 3. Citations to sources or references
