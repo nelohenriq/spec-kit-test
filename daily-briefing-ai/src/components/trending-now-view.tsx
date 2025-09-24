@@ -15,16 +15,19 @@ export function TrendingNowView() {
 
   // Load any cached trending topics on mount
   useEffect(() => {
-    const cached = localStorage.getItem('daily-briefing-trending-cache')
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached)
-        // Check if cache is less than 1 hour old
-        if (Date.now() - parsed.timestamp < 3600000) {
-          setTrendingTopics(parsed.topics)
+    // Only access localStorage on the client side
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('daily-briefing-trending-cache')
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached)
+          // Check if cache is less than 1 hour old
+          if (Date.now() - parsed.timestamp < 3600000) {
+            setTrendingTopics(parsed.topics)
+          }
+        } catch (error) {
+          console.error('Error loading cached trending topics:', error)
         }
-      } catch (error) {
-        console.error('Error loading cached trending topics:', error)
       }
     }
   }, [])

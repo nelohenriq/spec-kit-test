@@ -23,7 +23,7 @@ export interface TrendingTopic {
 }
 
 // Server action to generate briefing for user interests
-export async function generateBriefing(interests: string[]): Promise<BriefingResult[]> {
+export async function generateBriefing(interests: string[], providerId?: string): Promise<BriefingResult[]> {
   if (!interests.length) {
     throw new Error('No interests provided')
   }
@@ -32,7 +32,7 @@ export async function generateBriefing(interests: string[]): Promise<BriefingRes
     const results: BriefingResult[] = []
 
     for (const interest of interests) {
-      const result = await generateSingleBriefingForInterest(interest)
+      const result = await generateSingleBriefingForInterest(interest, providerId)
       results.push(result)
     }
 
@@ -93,9 +93,10 @@ export async function getTrendingTopics(): Promise<string[]> {
 }
 
 // Server action to generate single briefing for an interest
-export async function generateSingleBriefingForInterest(interest: string): Promise<BriefingResult> {
+export async function generateSingleBriefingForInterest(interest: string, providerId?: string): Promise<BriefingResult> {
   try {
-    // Generate summary with Google Search grounding
+    // For now, we'll use the Gemini model as default
+    // In a full implementation, this would use the selected provider
     const summaryPrompt = `Research and provide a comprehensive summary about "${interest}". Include key recent developments, important facts, and current trends. Use a neutral, informative tone and cite your sources.
 
 Format your response as HTML with proper structure:

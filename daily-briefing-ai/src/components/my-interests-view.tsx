@@ -5,21 +5,65 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DownloadButton } from "@/components/ui/download-button"
 import { storage } from "@/lib/storage"
+import { providerManager } from "@/lib/provider-manager"
 import type { BriefingResult } from "@/app/api/actions"
+import type { ProviderConfig } from "@/lib/providers"
+import { Settings, AlertCircle } from "lucide-react"
 
 export function MyInterestsView() {
   const [interests, setInterests] = useState<string[]>([])
   const [newInterest, setNewInterest] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [generatedBriefings, setGeneratedBriefings] = useState<BriefingResult[]>([])
+  const [availableProviders, setAvailableProviders] = useState<ProviderConfig[]>([])
+  const [selectedProviderId, setSelectedProviderId] = useState<string>("")
 
   // Load interests from localStorage on component mount
   useEffect(() => {
     const savedInterests = storage.getInterests()
     setInterests(savedInterests)
+    loadAvailableProviders()
   }, [])
+
+  // Listen for storage changes to refresh providers when they are updated in other tabs
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'daily-briefing-providers' || e.key === null) {
+        loadAvailableProviders()
+      }
+    }
+
+    const handleFocus = () => {
+      // Refresh providers when tab gains focus (user might have switched tabs)
+      loadAvailableProviders()
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [])
+
+  const loadAvailableProviders = async () => {
+    try {
+      const providers = await providerManager.getProviders()
+      const connectedProviders = providers.filter(p => p.isConnected)
+      setAvailableProviders(connectedProviders)
+
+      // Auto-select the first available provider
+      if (connectedProviders.length > 0 && !selectedProviderId) {
+        setSelectedProviderId(connectedProviders[0].id)
+      }
+    } catch (error) {
+      console.error("Error loading providers:", error)
+    }
+  }
 
   const addInterest = () => {
     const trimmedInterest = newInterest.trim()
@@ -38,13 +82,13 @@ export function MyInterestsView() {
   }
 
   const handleGenerate = async () => {
-    if (interests.length === 0) return
+    if (interests.length === 0 || !selectedProviderId) return
 
     setIsLoading(true)
     try {
       // Import and call the server action
       const { generateBriefing } = await import('@/app/api/actions')
-      const results = await generateBriefing(interests)
+      const results = await generateBriefing(interests, selectedProviderId)
 
       console.log("Generated briefings:", results)
       setGeneratedBriefings(results)
@@ -72,14 +116,46 @@ export function MyInterestsView() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Provider Selection */}
+          {availableProviders.length > 0 ? (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">AI Provider</label>
+              <Select value={selectedProviderId} onValueChange={setSelectedProviderId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an AI provider" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableProviders.map((provider) => (
+                    <SelectItem key={provider.id} value={provider.id}>
+                      {provider.name} ({provider.type})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            <div className="p-4 border border-amber-200 bg-amber-50 rounded-md">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-amber-600" />
+                <div>
+                  <p className="text-sm font-medium text-amber-800">No AI providers configured</p>
+                  <p className="text-sm text-amber-700">
+                    Go to the "AI Providers" tab to configure your API keys and test connections.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="flex gap-2">
             <Input
               placeholder="Enter an interest (e.g., artificial intelligence, climate change)"
               value={newInterest}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewInterest(e.target.value)}
               onKeyPress={handleKeyPress}
+              disabled={availableProviders.length === 0}
             />
-            <Button onClick={addInterest}>Add</Button>
+            <Button onClick={addInterest} disabled={availableProviders.length === 0}>Add</Button>
           </div>
 
           {interests.length > 0 && (
